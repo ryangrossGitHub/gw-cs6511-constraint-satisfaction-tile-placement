@@ -40,7 +40,7 @@ def backtrack(tile_counts, tile_locations, targets):
     reset_backtracking_vars(tile_locations, tile_counts)
     while True:
         variable = get_next_variable()
-        value = get_next_value()
+        value = get_next_value(variable)
 
         if value != '-1':
             current_state += str(variable) + value
@@ -71,13 +71,16 @@ def get_minimum_remaining_value():
     return tile_locations_remaining.pop(0)
 
 
-def get_next_value():
-    next_value = get_least_constraining_value()
+def get_next_value(variable):
+    next_value = get_least_constraining_value([])
 
     # If LCV takes us to already visited state
     # Keep looking for state we haven't been in yet until there are no options left
-    while current_state + next_value in visited_states:
-        next_value = get_least_constraining_value()
+    if current_state + str(variable) + next_value in visited_states:
+        already_visited_next_values = []
+        while current_state + str(variable) + next_value in visited_states:
+            already_visited_next_values.append(next_value)
+            next_value = get_least_constraining_value(already_visited_next_values)
 
     if next_value != '-1':
         if next_value == '1':
@@ -91,17 +94,18 @@ def get_next_value():
     return next_value
 
 
-def get_least_constraining_value():
+def get_least_constraining_value(values_to_avoid):
     # Least constraining is the tile that leaves the most bushes visible (el, then outer, then full)
     # El leaves 9 bushes visible
     # Outer leaves 4 bushes visible
     # Full leaves 0 bushes visible
     # Condition statements ensures there is enough tiles in inventory
-    if tile_counts_remaining['EL_SHAPE'] > 0:
+    # value_to_avoid is passed in to filter out options that would put us in an already visited state
+    if tile_counts_remaining['EL_SHAPE'] > 0 and EL_SHAPE not in values_to_avoid:
         return EL_SHAPE
-    elif tile_counts_remaining['OUTER_BOUNDARY'] > 0:
+    elif tile_counts_remaining['OUTER_BOUNDARY'] > 0 and OUTER_BOUNDARY not in values_to_avoid:
         return OUTER_BOUNDARY
-    elif tile_counts_remaining['FULL_BLOCK'] > 0:
+    elif tile_counts_remaining['FULL_BLOCK'] > 0 and FULL_BLOCK not in values_to_avoid:
         return FULL_BLOCK
     else:
         return '-1'  # No tiles left to choose from
@@ -129,7 +133,7 @@ def reset_backtracking_vars(tile_locations, tile_counts):
     global current_state
     current_state = ''
     tile_locations_remaining = [*range(len(tile_locations))]
-    tile_counts_remaining = tile_counts
+    tile_counts_remaining = tile_counts.copy()
     actuals = {'1': 0, '2': 0, '3': 0, '4': 0}
 
 
