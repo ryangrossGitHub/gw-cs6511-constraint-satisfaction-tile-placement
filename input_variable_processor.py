@@ -1,13 +1,61 @@
+import json
+
 import numpy as np
 
-from Tile import Tile
+from Tile_Location import Tile_Location
 
 
-def read_landscape_file(file):
+def get_landscape(file):
+    landscape = []
+    reading_landscape = False
     with open(file) as f:
-        landscape = [list(i[::2]) for i in f.readlines()]
-        validate_landscape(landscape)
-        return landscape
+        for i in f.readlines():
+            if i.startswith('# Landscape'):  # Next line starts landscape
+                reading_landscape = True
+                continue
+
+            if reading_landscape:
+                if i in ['\n', '\r\n']:  # Blank line represents end of landscape
+                    return landscape
+                else:
+                    landscape.append(list(i[::2]))
+
+
+def get_tile_counts(file):
+    reading_tiles = False
+    with open(file) as f:
+        for i in f.readlines():
+            if i.startswith('# Tiles:'):  # Next line starts tile counts
+                reading_tiles = True
+                continue
+
+            # Transform input to valid json
+            if reading_tiles:
+                i = i.replace('=', ':')
+                i = i.replace('OUTER_BOUNDARY', '"OUTER_BOUNDARY"')
+                i = i.replace('EL_SHAPE', '"EL_SHAPE"')
+                i = i.replace('FULL_BLOCK', '"FULL_BLOCK"')
+                i = i.replace('\n', '')
+                return json.loads(i)
+
+
+def get_targets(file):
+    targets = {}
+    reading_targets = False
+    with open(file) as f:
+        for i in f.readlines():
+            if i.startswith('# Targets:'):  # Next line starts tile counts
+                reading_targets = True
+                continue
+
+            # Transform input to valid json
+            if reading_targets:
+                if i in ['\n', '\r\n']:  # Blank line represents end of targets
+                    return targets
+                else:
+                    targets[i[0]] = i[2:-1]
+
+        return targets  # Handle case where the line after targets is EOF
 
 
 def validate_landscape(landscape):
@@ -23,7 +71,7 @@ def validate_landscape(landscape):
 
 # Start at coordinate 0, 0 (top left) and work left to right, line by line, top to bottom
 def create_tiles(landscape):
-    tiles = []
+    tile_locations = []
 
     tile_size = 4
     landscape_tile_width = int(len(landscape[0])/tile_size)
@@ -34,7 +82,7 @@ def create_tiles(landscape):
     tile_index = 0
     for y in range(landscape_tile_length):
         for x in range(landscape_tile_width):
-            tile = Tile(tile_index)
+            tile_location = Tile_Location(tile_index)
             el = {'ones': 0, 'twos': 0, 'threes': 0, 'fours': 0}
             outer = {'ones': 0, 'twos': 0, 'threes': 0, 'fours': 0}
 
@@ -63,9 +111,9 @@ def create_tiles(landscape):
                 elif value_at_coordinate == '4':
                     el['fours'] += 1
 
-            tile.set_el_response(el['ones'], el['twos'], el['threes'], el['fours'])
-            tile.set_outer_response(outer['ones'], outer['twos'], outer['threes'], outer['fours'])
-            tiles.append(tile)
+            tile_location.set_el_response(el['ones'], el['twos'], el['threes'], el['fours'])
+            tile_location.set_outer_response(outer['ones'], outer['twos'], outer['threes'], outer['fours'])
+            tile_locations.append(tile_location)
             tile_index += 1
 
-    return tiles
+    return tile_locations

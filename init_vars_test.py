@@ -1,7 +1,7 @@
 import os
 import unittest
 
-from landscape_processor import read_landscape_file
+from input_variable_processor import read_landscape_file
 
 
 class UnitTest(unittest.TestCase):
