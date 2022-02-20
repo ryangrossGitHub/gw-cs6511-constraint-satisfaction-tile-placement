@@ -7,6 +7,7 @@ from Tile_Location import Tile_Location
 
 def get_landscape(file):
     landscape = []
+    longest_row_length = 0
     reading_landscape = False
     with open(file) as f:
         for i in f.readlines():
@@ -16,9 +17,17 @@ def get_landscape(file):
 
             if reading_landscape:
                 if i in ['\n', '\r\n']:  # Blank line represents end of landscape
+                    # Handle cases where last values are spaces
+                    for row in landscape:
+                        while len(row) < longest_row_length:
+                            row.append(' ')
                     return landscape
                 else:
-                    landscape.append(list(i[::2]))
+                    row = list(i[::2])
+                    if len(row) > longest_row_length:
+                        longest_row_length = len(row)
+                    landscape.append(row)
+
 
 
 def get_tile_counts(file):

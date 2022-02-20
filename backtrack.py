@@ -47,9 +47,11 @@ def backtrack(tile_counts, tile_locations, targets):
             add_actuals(tile_locations, variable, value)
 
             if constraint_satisfied(targets):
+                print('Visited States: ' + str(visited_states))
                 return current_state
         else:  # There are no tiles left to choose that don't conflict with already visited states
             if current_state == '':
+                print('Visited States: ' + str(visited_states))
                 return -1  # If we are at the top of the tree then there is no solution
             else:
                 visited_states.append(current_state)  # Append this parent node so we don't go back down this path
