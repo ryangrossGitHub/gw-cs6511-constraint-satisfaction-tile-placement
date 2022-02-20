@@ -1,4 +1,4 @@
-from backtrack import backtrack
+from backtrack import backtrack, format_output
 from input_variable_processor import get_landscape, validate_landscape, create_tiles, get_tile_counts, get_targets
 
 file = 'landscape1.txt'
@@ -13,8 +13,11 @@ tile_locations = create_tiles(landscape)
 
 targets = get_targets(file)
 
-backtrack(tile_counts, tile_locations, targets)
+result = backtrack(tile_counts, tile_locations, targets)
 
-
-
+if result == -1:
+    print("There is no solution to this problem.")
+else:
+    print("Solution Found!")
+    format_output(result)
 
