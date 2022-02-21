@@ -1,3 +1,5 @@
+import time
+
 from backtrack import backtrack, format_output
 from input_variable_processor import get_landscape, validate_landscape, create_tiles, get_tile_counts, get_targets
 
@@ -13,11 +15,13 @@ tile_locations = create_tiles(landscape)
 
 targets = get_targets(file)
 
+start = time.time()
 result = backtrack(tile_counts, tile_locations, targets)
-
+end = time.time()
 if result == -1:
     print("There is no solution to this problem.")
 else:
     print("Solution Found!")
+    print("Time: " + str(end - start))
     format_output(result)
 

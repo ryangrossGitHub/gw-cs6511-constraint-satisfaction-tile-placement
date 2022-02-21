@@ -62,7 +62,7 @@ def get_targets(file):
                 if i in ['\n', '\r\n']:  # Blank line represents end of targets
                     return targets
                 else:
-                    targets[i[0]] = int(i[2:-1])
+                    targets[i[0]] = int(i.rstrip()[2:])
 
         return targets  # Handle case where the line after targets is EOF
 
