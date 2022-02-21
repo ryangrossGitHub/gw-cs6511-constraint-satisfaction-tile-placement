@@ -23,5 +23,5 @@ if result == -1:
 else:
     print("Solution Found!")
     print("Time: " + str(end - start))
-    format_output(result)
+    format_output(result, len(landscape[0]))
 

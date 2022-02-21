@@ -1,4 +1,6 @@
 # Actual counts as apposed to target counts
+from itertools import islice
+
 actuals = {'1': 0, '2': 0, '3': 0, '4': 0}
 
 tile_locations_remaining = []
@@ -140,15 +142,25 @@ def reset_backtracking_vars(tile_locations, tile_counts):
     #     print(visited_states[-1])
 
 
-def format_output(result):
+def format_output(result, grid_width):
     output = [char for char in result]
 
-    i = 0
-    for tile in output:
-        if tile == '1':
-            print(str(i) + ' 4 OUTER_BOUNDARY')
-        elif tile == '2':
-            print(str(i) + ' 4 EL_SHAPE')
-        elif tile == '3':
-            print(str(i) + ' 4 FULL_BLOCK')
-        i += 1
+    tile_width = 4
+    grid_output = chunks(output, int(grid_width/tile_width))
+
+    for column_index in range(int(grid_width/tile_width)):
+        for row in grid_output:
+            if row[column_index] == '1':
+                print(row[column_index] + ' 4 OUTER_BOUNDARY')
+            elif row[column_index] == '2':
+                print(row[column_index] + ' 4 EL_SHAPE')
+            elif row[column_index] == '3':
+                print(row[column_index] + ' 4 FULL_BLOCK')
+
+
+def chunks(original_list, size):
+    chunked_list = []
+    for i in range(0, len(original_list), size):
+        chunked_list.append(original_list[i:i + size])
+
+    return chunked_list
