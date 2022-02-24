@@ -22,6 +22,6 @@ if result == -1:
     print("There is no solution to this problem.")
 else:
     print("Solution Found!")
-    print("Time: " + str(end - start))
+    print("Time: " + str(end - start) + "s")
     format_output(result, len(landscape[0]))
 
