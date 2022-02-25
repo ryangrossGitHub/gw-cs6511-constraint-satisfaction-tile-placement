@@ -29,6 +29,17 @@ def backtrack(tile_counts, tile_locations, targets):
     reset_backtracking_vars(tile_locations, tile_counts)
     while True:
         value = get_least_constraining_value()
+        if value == '3':
+            if constraint_satisfied(targets):
+                visited_states.append(current_state)
+                print('Visited State Count: ' + str(len(visited_states)))
+                print('Actuals: ' + str(actuals))
+                return current_state
+            else:
+                visited_states.append(current_state)
+                reset_backtracking_vars(tile_locations, tile_counts)
+                continue
+
         variable = get_next_variable(value, tile_locations, targets)
 
         # Constraint check is passing
@@ -37,17 +48,17 @@ def backtrack(tile_counts, tile_locations, targets):
             add_actuals(tile_locations, variable, value)
         else:  # Constraint check is failing
             if len(current_state) == 0:  # If at top of tree, then no solution exists
-                print('Visited States: ' + str(visited_states))
+                print('Visited State Count: ' + str(len(visited_states)))
                 return -1
             else:
                 visited_states.append(current_state)  # Append this parent node so we don't go back down this path
                 reset_backtracking_vars(tile_locations, tile_counts)
 
         # If we make it down to a leaf node (bottom of the tree)
-        if len(current_state) == len(tile_locations):
+        if len(current_state) == len(tile_locations) or value == '3':
             if constraint_satisfied(targets):
                 visited_states.append(current_state)
-                print('Visited States: ' + str(visited_states))
+                print('Visited State Count: ' + str(len(visited_states)))
                 print('Actuals: ' + str(actuals))
                 return current_state
             else:
@@ -186,14 +197,25 @@ def reset_backtracking_vars(tile_locations, tile_counts):
     #     print(visited_states[-1])
 
 
-def format_output(result, grid_width):
+def format_output(result, grid_width, tile_count):
     output_variable_value_maps = []
 
-    for pair in result:
-        output_variable_value_maps.append({
-            'variable': pair[0],
-            'value': pair[1]
-        })
+    for i in range(tile_count):
+        found = False
+        for pair in result:
+            if pair[0] == i:
+                found = True
+                output_variable_value_maps.append({
+                    'variable': pair[0],
+                    'value': pair[1]
+                })
+                break
+
+        if not found:
+            output_variable_value_maps.append({
+                'variable': i,
+                'value': '3'  # Default rest of blocks to full block
+            })
 
     output_variable_value_maps.sort(key=lambda k: k['variable'])
 
