@@ -22,10 +22,10 @@
 4   3 4   4 3 4 3 2 2 2 1 4 3 4 3     1
 
 # Tiles:
-{OUTER_BOUNDARY=5, EL_SHAPE=5, FULL_BLOCK=18}
+{OUTER_BOUNDARY=5, EL_SHAPE=4, FULL_BLOCK=25}
 
 # Targets:
-1:18
-2:11
-3:12
-4:9
+1:19
+2:4
+3:9
+4:13

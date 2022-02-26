@@ -1,10 +1,12 @@
 # Actual counts as apposed to target counts
+import bisect
+
 actuals = {'1': 0, '2': 0, '3': 0, '4': 0}
 
 tile_locations_remaining = []
 tile_counts_remaining = {}
 visited_states = []
-current_state = []
+current_state = [[],[]]
 
 OUTER_BOUNDARY = '1'
 EL_SHAPE = '2'
@@ -47,23 +49,23 @@ def backtrack(tile_counts, tile_locations, targets):
             update_caches(value, variable)
             add_actuals(tile_locations, variable, value)
         else:  # Constraint check is failing
-            if len(current_state) == 0:  # If at top of tree, then no solution exists
+            if len(current_state[0]) == 0 and len(current_state[1]) == 0:  # If at top of tree, then no solution exists
                 print('Visited State Count: ' + str(len(visited_states)))
                 return -1
             else:
-                visited_states.append(current_state)  # Append this parent node so we don't go back down this path
+                visited_states.append(current_state)
                 reset_backtracking_vars(tile_locations, tile_counts)
 
         # If we make it down to a leaf node (bottom of the tree)
-        if len(current_state) == len(tile_locations) or value == '3':
-            if constraint_satisfied(targets):
-                visited_states.append(current_state)
-                print('Visited State Count: ' + str(len(visited_states)))
-                print('Actuals: ' + str(actuals))
-                return current_state
-            else:
-                visited_states.append(current_state)
-                reset_backtracking_vars(tile_locations, tile_counts)
+        # if len(current_state[0]) + len(current_state[1]) == len(tile_locations) or value == '3':
+        #     if constraint_satisfied(targets):
+        #         visited_states.append(current_state)
+        #         print('Visited State Count: ' + str(len(visited_states)))
+        #         print('Actuals: ' + str(actuals))
+        #         return current_state
+        #     else:
+        #         visited_states.append(current_state)
+        #         reset_backtracking_vars(tile_locations, tile_counts)
 
 
 def get_next_variable(value, tile_locations, targets):
@@ -134,12 +136,18 @@ def get_minimum_remaining_value(value, tile_locations, targets, var_avoid_list):
 
 
 def state_visited(value, variable):
-    current_state.append([variable, value])
+    if value == '1':
+        bisect.insort(current_state[0], variable)
+    elif value == '2':
+        bisect.insort(current_state[1], variable)
 
     if current_state not in visited_states:
         return False
     else:
-        current_state.pop()
+        if value == '1':
+            current_state[0].remove(variable)
+        elif value == '2':
+            current_state[1].remove(variable)
         return True
 
 
@@ -189,54 +197,19 @@ def reset_backtracking_vars(tile_locations, tile_counts):
     global tile_counts_remaining
     global actuals
     global current_state
-    current_state = []
+    current_state = [[],[]]
     tile_locations_remaining = [*range(len(tile_locations))]
     tile_counts_remaining = tile_counts.copy()
     actuals = {'1': 0, '2': 0, '3': 0, '4': 0}
-    # if len(visited_states) > 0:
-    #     print(visited_states[-1])
+    if len(visited_states) > 0:
+        print(visited_states[-1])
 
 
-def format_output(result, grid_width, tile_count):
-    output_variable_value_maps = []
-
+def format_output(result, tile_count):
     for i in range(tile_count):
-        found = False
-        for pair in result:
-            if pair[0] == i:
-                found = True
-                output_variable_value_maps.append({
-                    'variable': pair[0],
-                    'value': pair[1]
-                })
-                break
-
-        if not found:
-            output_variable_value_maps.append({
-                'variable': i,
-                'value': '3'  # Default rest of blocks to full block
-            })
-
-    output_variable_value_maps.sort(key=lambda k: k['variable'])
-
-    tile_width = 4
-    grid_output = chunks(output_variable_value_maps, int(grid_width/tile_width))
-
-    i = 0
-    for column_index in range(int(grid_width/tile_width)):
-        for row in grid_output:
-            if row[column_index]['value'] == '1':
-                print(str(i) + ' 4 OUTER_BOUNDARY')
-            elif row[column_index]['value'] == '2':
-                print(str(i) + ' 4 EL_SHAPE')
-            elif row[column_index]['value'] == '3':
-                print(str(i) + ' 4 FULL_BLOCK')
-            i += 1
-
-
-def chunks(original_list, size):
-    chunked_list = []
-    for i in range(0, len(original_list), size):
-        chunked_list.append(original_list[i:i + size])
-
-    return chunked_list
+        if i in result[0]:
+            print(str(i) + ' 4 OUTER_BOUNDARY')
+        elif i in result[1]:
+            print(str(i) + ' 4 EL_SHAPE')
+        else:
+            print(str(i) + ' 4 FULL_BLOCK')
