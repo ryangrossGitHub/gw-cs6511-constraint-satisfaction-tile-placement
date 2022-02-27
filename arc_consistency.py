@@ -33,6 +33,9 @@ def filter_domains(tile_counts, tile_locations, targets):
     valid_mrv = apply_forward_check(combos[mrv[0]], tile_locations, [], targets, mrv[0], False)
     print(f"Total Combos MRV after Forward Check: {len(valid_mrv):,}")
 
+    print("Sorting MRV combos into Least Constrained Value (LCV) order...")
+    valid_mrv.sort(key=lambda k: k[2], reverse=True)
+
     print("Applying Arc Consistency to remaining combos...")
     mrv_2_combos = list(combos[mrv[1]])
     for valid_lcv_combos in valid_mrv:
@@ -65,7 +68,9 @@ def apply_forward_check(combos, tile_locations, reserved_tile_locations, targets
             if csp_complete:
                 return combo
             elif actuals != -1:
-                valid_combos.append([combo, actuals])
+                min_delta = min([targets[0] - actuals[0], targets[1] - actuals[1], targets[2] - actuals[2],
+                                 targets[3] - actuals[3]])
+                valid_combos.append([combo, actuals, min_delta])
 
     return valid_combos
 
