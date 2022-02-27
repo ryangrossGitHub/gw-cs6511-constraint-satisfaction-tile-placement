@@ -1,5 +1,6 @@
 # Actual counts as apposed to target counts
 import bisect
+import copy
 
 actuals = {'1': 0, '2': 0, '3': 0, '4': 0}
 
@@ -7,6 +8,8 @@ tile_locations_remaining = []
 tile_counts_remaining = {}
 visited_states = []
 current_state = [[],[]]
+variable_try_ordering = []
+value_try_ordering = []
 
 OUTER_BOUNDARY = '1'
 EL_SHAPE = '2'
@@ -23,22 +26,25 @@ def constraint_satisfied(targets):
 
 def backtrack(tile_counts, tile_locations, targets):
     global current_state
+    global tile_locations_remaining
+    global tile_counts_remaining
     if len(tile_locations) > (tile_counts['OUTER_BOUNDARY'] +
                                tile_counts['EL_SHAPE'] +
                                tile_counts['FULL_BLOCK']):
         raise ValueError('There are not enough tiles to cover the landscape!')
 
-    reset_backtracking_vars(tile_locations, tile_counts)
+    tile_locations_remaining = [*range(len(tile_locations))]
+    tile_counts_remaining = tile_counts.copy()
     while True:
         value = get_least_constraining_value()
         if value == '3':
             if constraint_satisfied(targets):
-                visited_states.append(current_state)
+                visited_states.append(copy.deepcopy(current_state))
                 print('Visited State Count: ' + str(len(visited_states)))
                 print('Actuals: ' + str(actuals))
                 return current_state
             else:
-                visited_states.append(current_state)
+                visited_states.append(copy.deepcopy(current_state))
                 reset_backtracking_vars(tile_locations, tile_counts)
                 continue
 
@@ -53,7 +59,7 @@ def backtrack(tile_counts, tile_locations, targets):
                 print('Visited State Count: ' + str(len(visited_states)))
                 return -1
             else:
-                visited_states.append(current_state)
+                visited_states.append(copy.deepcopy(current_state))
                 reset_backtracking_vars(tile_locations, tile_counts)
 
         # If we make it down to a leaf node (bottom of the tree)
@@ -69,6 +75,7 @@ def backtrack(tile_counts, tile_locations, targets):
 
 
 def get_next_variable(value, tile_locations, targets):
+    global variable_try_ordering
     variables_leading_to_visited_state = []
     while True:
         if value == '3':
@@ -82,6 +89,8 @@ def get_next_variable(value, tile_locations, targets):
         if mvr == -1:
             return mvr
         elif not state_visited(value, mvr):
+            variable_try_ordering.append(mvr)
+            value_try_ordering.append(value)
             return mvr
         else:
             if len(tile_locations_remaining) == 1:  # Nothing left to try
@@ -197,10 +206,26 @@ def reset_backtracking_vars(tile_locations, tile_counts):
     global tile_counts_remaining
     global actuals
     global current_state
-    current_state = [[],[]]
-    tile_locations_remaining = [*range(len(tile_locations))]
-    tile_counts_remaining = tile_counts.copy()
-    actuals = {'1': 0, '2': 0, '3': 0, '4': 0}
+    last_variable = variable_try_ordering[-1]
+    if value_try_ordering[-1] == '1':
+        current_state[0].remove(last_variable)
+        tile_counts_remaining['OUTER_BOUNDARY'] += 1
+        actuals['1'] -= tile_locations[last_variable].outer['ones']
+        actuals['2'] -= tile_locations[last_variable].outer['twos']
+        actuals['3'] -= tile_locations[last_variable].outer['threes']
+        actuals['4'] -= tile_locations[last_variable].outer['fours']
+    elif value_try_ordering[-1] == '2':
+        current_state[1].remove(last_variable)
+        tile_counts_remaining['EL_SHAPE'] += 1
+        actuals['1'] -= tile_locations[last_variable].el['ones']
+        actuals['2'] -= tile_locations[last_variable].el['twos']
+        actuals['3'] -= tile_locations[last_variable].el['threes']
+        actuals['4'] -= tile_locations[last_variable].el['fours']
+
+    del value_try_ordering[-1]
+    del variable_try_ordering[-1]
+    tile_locations_remaining.append(last_variable)
+
     if len(visited_states) > 0:
         print(visited_states[-1])
 
