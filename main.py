@@ -3,7 +3,7 @@ import time
 from backtrack import backtrack, format_output
 from input_variable_processor import get_landscape, validate_landscape, create_tiles, get_tile_counts, get_targets
 
-file = 'landscape1.txt'
+file = 'test_files/test10.txt'
 landscape = get_landscape(file)
 validate_landscape(landscape)
 

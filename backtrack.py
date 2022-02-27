@@ -226,20 +226,11 @@ def reset_backtracking_vars(tile_locations, tile_counts):
     del variable_try_ordering[-1]
     tile_locations_remaining.append(last_variable)
 
-    if len(visited_states) > 0:
-        print(visited_states[-1])
+    # if len(visited_states) > 0:
+    #     print(visited_states[-1])
 
 
 def format_output(result, grid_width, tile_count):
-
-    # for i in range(tile_count):
-    #     if i in result[0]:
-    #         print(str(i) + ' 4 OUTER_BOUNDARY')
-    #     elif i in result[1]:
-    #         print(str(i) + ' 4 EL_SHAPE')
-    #     else:
-    #         print(str(i) + ' 4 FULL_BLOCK')
-
     output_variable_value_maps = []
 
     for i in range(tile_count):
