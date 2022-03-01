@@ -4,7 +4,7 @@ from arc_consistency import filter_domains
 from output_formatter import format_output
 from input_variable_processor import get_landscape, validate_landscape, create_tiles, get_tile_counts, get_targets
 
-file = 'test7.txt'
+file = 'test10.txt'
 path = 'test_files/'
 print("Processing: " + file)
 landscape = get_landscape(path + file)
